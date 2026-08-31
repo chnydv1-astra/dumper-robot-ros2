@@ -6,6 +6,11 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    world_file = PathJoinSubstitution([
+        FindPackageShare("dumper_gazebo"),
+        "worlds",
+        "mine_world.sdf"
+    ])
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -16,7 +21,7 @@ def generate_launch_description():
             ])
         ),
         launch_arguments={
-            "gz_args": "-r empty.sdf"
+            "gz_args": ["-r ", world_file]
         }.items()
     )
 
@@ -60,12 +65,13 @@ def generate_launch_description():
             "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
             "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
-            "/world/empty/model/dumper/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
+            "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+            "/world/mine_world/model/dumper/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
             "/model/dumper/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
         ],
         remappings=[
-            ("/world/empty/model/dumper/joint_state", "/joint_states"),
+            ("/imu", "/imu/data"),
+            ("/world/mine_world/model/dumper/joint_state", "/joint_states"),
             ("/model/dumper/tf", "/tf")
         ],
         output="screen"

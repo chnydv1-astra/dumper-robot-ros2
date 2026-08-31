@@ -101,16 +101,14 @@
     <mu2>0.001</mu2>
   </gazebo>
 
-  <!-- LiDAR Link -->
+  <!-- 2D LiDAR -->
   <link name="lidar_link">
     <visual>
-      <origin xyz="0 0 0"/>
-      <geometry><cylinder radius="0.08" length="0.1"/></geometry>
+      <geometry><cylinder radius="0.08" length="0.10"/></geometry>
       <material name="black"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0"/>
-      <geometry><cylinder radius="0.08" length="0.1"/></geometry>
+      <geometry><cylinder radius="0.08" length="0.10"/></geometry>
     </collision>
     <inertial>
       <mass value="0.1"/>
@@ -130,7 +128,6 @@
       <visualize>true</visualize>
       <update_rate>10</update_rate>
       <topic>/scan</topic>
-      <gz_frame_id>lidar_link</gz_frame_id>
       <lidar>
         <scan>
           <horizontal>
@@ -154,28 +151,36 @@
       </lidar>
     </sensor>
   </gazebo>
-    
-  <!-- IMU Link -->
-  <link name="imu_link"/>
+
+  <!-- IMU -->
+  <link name="imu_link">
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
 
   <joint name="imu_joint" type="fixed">
     <parent link="base_link"/>
     <child link="imu_link"/>
-    <origin xyz="0 0 0.65"/>
+    <origin xyz="0 0 0.65" rpy="0 0 0"/>
   </joint>
+
+  <gazebo reference="imu_joint">
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
 
   <gazebo reference="imu_link">
     <sensor name="imu_sensor" type="imu">
       <always_on>true</always_on>
       <update_rate>100</update_rate>
-      <topic>/imu/data</topic>
-      <gz_frame_id>imu_link</gz_frame_id>
+      <topic>/imu</topic>
     </sensor>
   </gazebo>
 
-  <!-- Gazebo System Plugins -->
+  <!-- Gazebo robot plugins -->
   <gazebo>
-    <!-- Differential Drive Plugin -->
     <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
@@ -189,15 +194,9 @@
       <publish_odom_tf>true</publish_odom_tf>
     </plugin>
 
-    <!-- Joint State Publisher Plugin -->
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
       <joint_name>left_wheel_joint</joint_name>
       <joint_name>right_wheel_joint</joint_name>
-    </plugin>
-
-    <!-- Sensors Plugin -->
-    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
-      <render_engine>ogre2</render_engine>
     </plugin>
   </gazebo>
 

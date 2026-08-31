@@ -1,0 +1,393 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <world name="mine_world">
+
+    <!-- Core Gazebo systems -->
+    <plugin filename="libignition-gazebo-physics-system.so"
+            name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="libignition-gazebo-user-commands-system.so"
+            name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="libignition-gazebo-scene-broadcaster-system.so"
+            name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="libignition-gazebo-sensors-system.so"
+            name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- IMU system -->
+    <plugin filename="libignition-gazebo-imu-system.so"
+        name="ignition::gazebo::systems::Imu"/> 
+
+    <gravity>0 0 -9.81</gravity>
+
+    <!-- World appearance -->
+    <scene>
+      <ambient>0.35 0.35 0.35 1</ambient>
+      <background>0.12 0.12 0.12 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <!-- Sun -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 30 0.3 0.2 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.4 0.3 -1</direction>
+    </light>
+
+    <!-- ===================================================== -->
+    <!-- BASE GROUND                                           -->
+    <!-- ===================================================== -->
+
+    <model name="ground">
+      <static>true</static>
+      <link name="ground_link">
+        <collision name="ground_collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 120</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="ground_visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>120 120</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.25 0.22 0.18 1</ambient>
+            <diffuse>0.35 0.30 0.24 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- MAIN HAUL ROAD                                        -->
+    <!-- ===================================================== -->
+
+    <model name="road_main">
+      <static>true</static>
+      <pose>0 0 0.02 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12 60 0.08</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12 60 0.08</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.12 0.10 0.08 1</ambient>
+            <diffuse>0.18 0.15 0.12 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- SIDE ROAD                                             -->
+    <!-- ===================================================== -->
+
+    <model name="road_side">
+      <static>true</static>
+      <pose>25 0 0.025 0 0 1.5708</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10 45 0.08</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10 45 0.08</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.12 0.10 0.08 1</ambient>
+            <diffuse>0.18 0.15 0.12 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- INTERSECTION ROAD                                     -->
+    <!-- ===================================================== -->
+
+    <model name="road_cross">
+      <static>true</static>
+      <pose>0 22 0.03 0 0 1.5708</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>14 25 0.08</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>14 25 0.08</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.12 0.10 0.08 1</ambient>
+            <diffuse>0.18 0.15 0.12 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- ROAD BERM LEFT                                        -->
+    <!-- ===================================================== -->
+
+    <model name="berm_left">
+      <static>true</static>
+      <pose>-7 0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.2 60 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.2 60 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.38 0.28 0.16 1</ambient>
+            <diffuse>0.45 0.32 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- ROAD BERM RIGHT                                       -->
+    <!-- ===================================================== -->
+
+    <model name="berm_right">
+      <static>true</static>
+      <pose>7 0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.2 60 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.2 60 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.38 0.28 0.16 1</ambient>
+            <diffuse>0.45 0.32 0.18 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- MINE WALL / BENCH 1                                   -->
+    <!-- ===================================================== -->
+
+    <model name="bench_1">
+      <static>true</static>
+      <pose>-28 0 2 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8 60 4</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8 60 4</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.28 0.20 0.14 1</ambient>
+            <diffuse>0.35 0.24 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- MINE WALL / BENCH 2                                   -->
+    <!-- ===================================================== -->
+
+    <model name="bench_2">
+      <static>true</static>
+      <pose>28 0 3 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8 60 6</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8 60 6</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.30 0.21 0.14 1</ambient>
+            <diffuse>0.38 0.26 0.17 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- ORE STOCKPILE                                         -->
+    <!-- ===================================================== -->
+
+    <model name="ore_stockpile">
+      <static>true</static>
+      <pose>19 18 2.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>7</radius>
+              <length>5</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>7</radius>
+              <length>5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.32 0.18 0.08 1</ambient>
+            <diffuse>0.45 0.25 0.10 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- ROCK OBSTACLES                                        -->
+    <!-- ===================================================== -->
+
+    <model name="rock_1">
+      <static>true</static>
+      <pose>3 10 0.8 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <sphere><radius>0.8</radius></sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere><radius>0.8</radius></sphere>
+          </geometry>
+          <material>
+            <ambient>0.20 0.16 0.12 1</ambient>
+            <diffuse>0.28 0.22 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="rock_2">
+      <static>true</static>
+      <pose>-2 -15 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <sphere><radius>0.6</radius></sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere><radius>0.6</radius></sphere>
+          </geometry>
+          <material>
+            <ambient>0.20 0.16 0.12 1</ambient>
+            <diffuse>0.28 0.22 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="rock_3">
+      <static>true</static>
+      <pose>22 -8 0.9 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <sphere><radius>0.9</radius></sphere>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <sphere><radius>0.9</radius></sphere>
+          </geometry>
+          <material>
+            <ambient>0.22 0.17 0.12 1</ambient>
+            <diffuse>0.30 0.23 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ===================================================== -->
+    <!-- LOADING AREA                                          -->
+    <!-- ===================================================== -->
+
+    <model name="loading_area">
+      <static>true</static>
+      <pose>18 -18 0.04 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>14 12 0.08</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.20 0.17 0.13 1</ambient>
+            <diffuse>0.28 0.23 0.17 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
