@@ -388,6 +388,34 @@
         </visual>
       </link>
     </model>
+    <!-- ===================================================== -->
+<!-- BLIND-ZONE OBSTACLE                                   -->
+<!-- ===================================================== -->
+
+    <model name="blind_zone_rock">
+      <static>true</static>
+      <pose>8 18 2.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8 8 4</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8 8 4</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.30 0.20 0.12 1</ambient>
+            <diffuse>0.40 0.27 0.16 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
 
   </world>
 </sdf>

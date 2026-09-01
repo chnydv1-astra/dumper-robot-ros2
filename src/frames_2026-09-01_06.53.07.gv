@@ -1,0 +1,18 @@
+digraph G {
+"dumper1/odom" -> "dumper1/base_link"[label=" Broadcaster: default_authority\nAverage rate: 29.928\nBuffer length: 1.938\nMost recent transform: 144.533\nOldest transform: 142.595\n"];
+"dumper2/odom" -> "dumper2/base_link"[label=" Broadcaster: default_authority\nAverage rate: 29.928\nBuffer length: 1.938\nMost recent transform: 144.534\nOldest transform: 142.596\n"];
+"dumper2/base_link" -> "dumper2/left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.667\nBuffer length: 1.5\nMost recent transform: 144.543\nOldest transform: 143.043\n"];
+"dumper2/base_link" -> "dumper2/right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.667\nBuffer length: 1.5\nMost recent transform: 144.543\nOldest transform: 143.043\n"];
+"dumper1/base_link" -> "dumper1/left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.661\nBuffer length: 1.452\nMost recent transform: 144.525\nOldest transform: 143.073\n"];
+"dumper1/base_link" -> "dumper1/right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.661\nBuffer length: 1.452\nMost recent transform: 144.525\nOldest transform: 143.073\n"];
+"dumper1/base_link" -> "dumper1/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1788225787.502367"[ shape=plaintext ] ;
+}->"dumper2/odom";
+}

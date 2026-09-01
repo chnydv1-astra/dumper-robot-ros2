@@ -12,6 +12,12 @@ def generate_launch_description():
         "mine_world.sdf"
     ])
 
+    xacro_file = PathJoinSubstitution([
+        FindPackageShare("dumper_description"),
+        "urdf",
+        "dumper.urdf.xacro"
+    ])
+
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([
@@ -20,36 +26,34 @@ def generate_launch_description():
                 "gz_sim.launch.py"
             ])
         ),
-        launch_arguments={
-            "gz_args": ["-r ", world_file]
-        }.items()
+        launch_arguments={"gz_args": ["-r ", world_file]}.items()
     )
 
-    robot_description = Command([
-        "xacro ",
-        PathJoinSubstitution([
-            FindPackageShare("dumper_description"),
-            "urdf",
-            "dumper.urdf.xacro"
-        ])
+    # ---------------- DUMPER 1 ----------------
+
+    robot1_description = Command([
+        "xacro ", xacro_file,
+        " prefix:=dumper1/",
+        " robot_namespace:=dumper1"
     ])
 
-    robot_state_publisher = Node(
+    robot1_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
+        namespace="dumper1",
         parameters=[{
-            "robot_description": robot_description,
+            "robot_description": robot1_description,
             "use_sim_time": True
         }],
         output="screen"
     )
 
-    spawn_robot = Node(
+    spawn_robot1 = Node(
         package="ros_gz_sim",
         executable="create",
         arguments=[
-            "-name", "dumper",
-            "-topic", "robot_description",
+            "-name", "dumper1",
+            "-topic", "/dumper1/robot_description",
             "-x", "0",
             "-y", "0",
             "-z", "0.5"
@@ -57,25 +61,77 @@ def generate_launch_description():
         output="screen"
     )
 
+    # ---------------- DUMPER 2 ----------------
+
+    robot2_description = Command([
+        "xacro ", xacro_file,
+        " prefix:=dumper2/",
+        " robot_namespace:=dumper2"
+    ])
+
+    robot2_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        namespace="dumper2",
+        parameters=[{
+            "robot_description": robot2_description,
+            "use_sim_time": True
+        }],
+        output="screen"
+    )
+
+    spawn_robot2 = Node(
+        package="ros_gz_sim",
+        executable="create",
+        arguments=[
+            "-name", "dumper2",
+            "-topic", "/dumper2/robot_description",
+            "-x", "0",
+            "-y", "35",
+            "-z", "0.5",
+            "-Y", "-1.5708"
+        ],
+        output="screen"
+    )
+
+    # ---------------- BRIDGE ----------------
+
     bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
-            "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
-            "/world/mine_world/model/dumper/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
-            "/model/dumper/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
+
+            "/dumper1/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            "/dumper1/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/dumper1/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            "/dumper1/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+
+            "/dumper2/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            "/dumper2/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/dumper2/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            "/dumper2/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+
+            "/world/mine_world/model/dumper1/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
+            "/world/mine_world/model/dumper2/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
+
+            "/model/dumper1/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+            "/model/dumper2/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
         ],
         remappings=[
-            ("/imu", "/imu/data"),
-            ("/world/mine_world/model/dumper/joint_state", "/joint_states"),
-            ("/model/dumper/tf", "/tf")
+            ("/dumper1/imu", "/dumper1/imu/data"),
+            ("/dumper2/imu", "/dumper2/imu/data"),
+
+            ("/world/mine_world/model/dumper1/joint_state", "/dumper1/joint_states"),
+            ("/world/mine_world/model/dumper2/joint_state", "/dumper2/joint_states"),
+
+            ("/model/dumper1/tf", "/tf"),
+            ("/model/dumper2/tf", "/tf")
         ],
         output="screen"
     )
+
+    # ---------------- RVIZ ----------------
 
     rviz_config_file = PathJoinSubstitution([
         FindPackageShare("dumper_description"),
@@ -94,7 +150,10 @@ def generate_launch_description():
 
     delayed_spawn = TimerAction(
         period=3.0,
-        actions=[spawn_robot]
+        actions=[
+            spawn_robot1,
+            spawn_robot2
+        ]
     )
 
     delayed_bridge = TimerAction(
@@ -109,7 +168,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         gazebo,
-        robot_state_publisher,
+        robot1_state_publisher,
+        robot2_state_publisher,
         delayed_spawn,
         delayed_bridge,
         delayed_rviz
