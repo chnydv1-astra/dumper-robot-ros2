@@ -1,0 +1,15 @@
+digraph G {
+"dumper1/odom" -> "dumper1/base_link"[label=" Broadcaster: default_authority\nAverage rate: 30.493\nBuffer length: 2.23\nMost recent transform: 748.96\nOldest transform: 746.73\n"];
+"dumper2/base_link" -> "dumper2/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.325\nBuffer length: 1.476\nMost recent transform: 23.952\nOldest transform: 22.476\n"];
+"dumper1/base_link" -> "dumper1/right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.325\nBuffer length: 1.476\nMost recent transform: 23.952\nOldest transform: 22.476\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1788277683.732703"[ shape=plaintext ] ;
+}->"dumper2/base_link";
+}

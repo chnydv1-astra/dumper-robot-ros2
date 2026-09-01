@@ -94,7 +94,7 @@ def generate_launch_description():
         output="screen"
     )
 
-    # ---------------- BRIDGE ----------------
+        # ---------------- BRIDGE ----------------
 
     bridge = Node(
         package="ros_gz_bridge",
@@ -103,34 +103,31 @@ def generate_launch_description():
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
 
             "/dumper1/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            "/dumper1/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/dumper1/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/dumper1/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+            "/dumper1/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
 
             "/dumper2/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            "/dumper2/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/dumper2/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/dumper2/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
 
             "/world/mine_world/model/dumper1/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
-            "/world/mine_world/model/dumper2/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
+            "/world/mine_world/model/dumper2/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
 
-            "/model/dumper1/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
-            "/model/dumper2/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V"
+            
         ],
         remappings=[
-            ("/dumper1/imu", "/dumper1/imu/data"),
-            ("/dumper2/imu", "/dumper2/imu/data"),
+            ("/odom", "/dumper1/odom"),
 
-            ("/world/mine_world/model/dumper1/joint_state", "/dumper1/joint_states"),
-            ("/world/mine_world/model/dumper2/joint_state", "/dumper2/joint_states"),
+            ("/world/mine_world/model/dumper1/joint_state",
+             "/dumper1/joint_states"),
 
-            ("/model/dumper1/tf", "/tf"),
-            ("/model/dumper2/tf", "/tf")
+            ("/world/mine_world/model/dumper2/joint_state",
+             "/dumper2/joint_states")
+
+            
         ],
         output="screen"
     )
-
     # ---------------- RVIZ ----------------
 
     rviz_config_file = PathJoinSubstitution([

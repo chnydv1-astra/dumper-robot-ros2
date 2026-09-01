@@ -1,137 +1,216 @@
 <?xml version="1.0"?>
 <robot name="dumper" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Multi-dumper arguments -->
+  <!-- Arguments -->
   <xacro:arg name="prefix" default=""/>
-  <xacro:arg name="robot_namespace" default="dumper"/>
+  <xacro:arg name="robot_namespace" default="dumper1"/>
+
+  <!-- Convenience properties -->
+  <xacro:property name="prefix" value="$(arg prefix)"/>
+  <xacro:property name="robot_namespace" value="$(arg robot_namespace)"/>
+
 
   <!-- Materials -->
   <material name="yellow">
     <color rgba="0.8 0.6 0.05 1.0"/>
   </material>
+
   <material name="black">
     <color rgba="0.03 0.03 0.03 1.0"/>
   </material>
 
-  <!-- Base chassis -->
-  <link name="$(arg prefix)base_link">
+
+  <!-- ================= BASE CHASSIS ================= -->
+
+  <link name="${prefix}base_link">
     <visual>
-      <origin xyz="0 0 0.50"/>
-      <geometry><box size="2.0 1.2 0.6"/></geometry>
+      <origin xyz="0 0 0.35"/>
+      <geometry>
+        <box size="2.0 1.2 0.6"/>
+      </geometry>
       <material name="yellow"/>
     </visual>
+
     <collision>
-      <origin xyz="0 0 0.50"/>
-      <geometry><box size="2.0 1.2 0.6"/></geometry>
+      <origin xyz="0 0 0.35"/>
+      <geometry>
+        <box size="2.0 1.2 0.6"/>
+      </geometry>
     </collision>
+
     <inertial>
-      <origin xyz="0 0 0.50"/>
+      <origin xyz="0 0 0.35"/>
       <mass value="80"/>
-      <inertia ixx="12" ixy="0" ixz="0" iyy="30" iyz="0" izz="36"/>
+      <inertia
+        ixx="12"
+        ixy="0"
+        ixz="0"
+        iyy="30"
+        iyz="0"
+        izz="36"/>
     </inertial>
   </link>
 
-  <!-- Left drive wheel -->
-  <link name="$(arg prefix)left_wheel">
+
+  <!-- ================= LEFT WHEEL ================= -->
+
+  <link name="${prefix}left_wheel">
     <visual>
       <origin rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.30" length="0.20"/></geometry>
+      <geometry>
+        <cylinder radius="0.30" length="0.20"/>
+      </geometry>
       <material name="black"/>
     </visual>
+
     <collision>
       <origin rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.30" length="0.20"/></geometry>
+      <geometry>
+        <cylinder radius="0.30" length="0.20"/>
+      </geometry>
     </collision>
+
     <inertial>
       <mass value="5"/>
-      <inertia ixx="0.3" ixy="0" ixz="0" iyy="0.3" iyz="0" izz="0.3"/>
+      <inertia
+        ixx="0.3"
+        ixy="0"
+        ixz="0"
+        iyy="0.3"
+        iyz="0"
+        izz="0.3"/>
     </inertial>
   </link>
 
-  <joint name="$(arg prefix)left_wheel_joint" type="continuous">
-    <parent link="$(arg prefix)base_link"/>
-    <child link="$(arg prefix)left_wheel"/>
+  <joint name="${prefix}left_wheel_joint" type="continuous">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}left_wheel"/>
     <origin xyz="0 0.70 0.30"/>
     <axis xyz="0 1 0"/>
   </joint>
 
-  <!-- Right drive wheel -->
-  <link name="$(arg prefix)right_wheel">
+
+  <!-- ================= RIGHT WHEEL ================= -->
+
+  <link name="${prefix}right_wheel">
     <visual>
       <origin rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.30" length="0.20"/></geometry>
+      <geometry>
+        <cylinder radius="0.30" length="0.20"/>
+      </geometry>
       <material name="black"/>
     </visual>
+
     <collision>
       <origin rpy="1.5708 0 0"/>
-      <geometry><cylinder radius="0.30" length="0.20"/></geometry>
+      <geometry>
+        <cylinder radius="0.30" length="0.20"/>
+      </geometry>
     </collision>
+
     <inertial>
       <mass value="5"/>
-      <inertia ixx="0.3" ixy="0" ixz="0" iyy="0.3" iyz="0" izz="0.3"/>
+      <inertia
+        ixx="0.3"
+        ixy="0"
+        ixz="0"
+        iyy="0.3"
+        iyz="0"
+        izz="0.3"/>
     </inertial>
   </link>
 
-  <joint name="$(arg prefix)right_wheel_joint" type="continuous">
-    <parent link="$(arg prefix)base_link"/>
-    <child link="$(arg prefix)right_wheel"/>
+  <joint name="${prefix}right_wheel_joint" type="continuous">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}right_wheel"/>
     <origin xyz="0 -0.70 0.30"/>
     <axis xyz="0 1 0"/>
   </joint>
 
-  <!-- Passive caster -->
-  <link name="$(arg prefix)caster">
+
+  <!-- ================= CASTER ================= -->
+
+  <link name="${prefix}caster">
     <visual>
-      <geometry><sphere radius="0.15"/></geometry>
+      <geometry>
+        <sphere radius="0.15"/>
+      </geometry>
       <material name="black"/>
     </visual>
+
     <collision>
-      <geometry><sphere radius="0.15"/></geometry>
+      <geometry>
+        <sphere radius="0.15"/>
+      </geometry>
     </collision>
+
     <inertial>
       <mass value="1"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <inertia
+        ixx="0.01"
+        ixy="0"
+        ixz="0"
+        iyy="0.01"
+        iyz="0"
+        izz="0.01"/>
     </inertial>
   </link>
 
-  <joint name="$(arg prefix)caster_joint" type="fixed">
-    <parent link="$(arg prefix)base_link"/>
-    <child link="$(arg prefix)caster"/>
+  <joint name="${prefix}caster_joint" type="fixed">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}caster"/>
     <origin xyz="-0.75 0 0.15"/>
   </joint>
 
-  <gazebo reference="$(arg prefix)caster">
+  <gazebo reference="${prefix}caster">
     <mu1>0.001</mu1>
     <mu2>0.001</mu2>
   </gazebo>
 
-  <!-- 2D LiDAR -->
-  <link name="$(arg prefix)lidar_link">
+
+  <!-- ================= LIDAR ================= -->
+
+  <link name="${prefix}lidar_link">
     <visual>
-      <geometry><cylinder radius="0.08" length="0.10"/></geometry>
+      <geometry>
+        <cylinder radius="0.08" length="0.10"/>
+      </geometry>
       <material name="black"/>
     </visual>
+
     <collision>
-      <geometry><cylinder radius="0.08" length="0.10"/></geometry>
+      <geometry>
+        <cylinder radius="0.08" length="0.10"/>
+      </geometry>
     </collision>
+
     <inertial>
       <mass value="0.1"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <inertia
+        ixx="0.001"
+        ixy="0"
+        ixz="0"
+        iyy="0.001"
+        iyz="0"
+        izz="0.001"/>
     </inertial>
   </link>
 
-  <joint name="$(arg prefix)lidar_joint" type="fixed">
-    <parent link="$(arg prefix)base_link"/>
-    <child link="$(arg prefix)lidar_link"/>
+  <joint name="${prefix}lidar_joint" type="fixed">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}lidar_link"/>
     <origin xyz="0.8 0 0.70" rpy="0 0 0"/>
   </joint>
 
-  <gazebo reference="$(arg prefix)lidar_link">
-    <sensor name="$(arg prefix)lidar_sensor" type="gpu_lidar">
+  <gazebo reference="${prefix}lidar_link">
+    <sensor name="${robot_namespace}_lidar_sensor" type="gpu_lidar">
       <always_on>true</always_on>
       <visualize>true</visualize>
       <update_rate>10</update_rate>
-      <topic>/$(arg robot_namespace)/scan</topic>
+
+      <topic>/${robot_namespace}/scan</topic>
+      <gz_frame_id>${robot_namespace}/lidar_link</gz_frame_id>
+
       <lidar>
         <scan>
           <horizontal>
@@ -140,6 +219,7 @@
             <min_angle>-3.14159</min_angle>
             <max_angle>3.14159</max_angle>
           </horizontal>
+
           <vertical>
             <samples>1</samples>
             <resolution>1</resolution>
@@ -147,6 +227,7 @@
             <max_angle>0</max_angle>
           </vertical>
         </scan>
+
         <range>
           <min>0.2</min>
           <max>30.0</max>
@@ -156,51 +237,78 @@
     </sensor>
   </gazebo>
 
-  <!-- IMU -->
-  <link name="$(arg prefix)imu_link">
+
+  <!-- ================= IMU ================= -->
+
+  <link name="${prefix}imu_link">
     <inertial>
       <mass value="0.01"/>
       <origin xyz="0 0 0"/>
-      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+
+      <inertia
+        ixx="0.00001"
+        ixy="0"
+        ixz="0"
+        iyy="0.00001"
+        iyz="0"
+        izz="0.00001"/>
     </inertial>
   </link>
 
-  <joint name="$(arg prefix)imu_joint" type="fixed">
-    <parent link="$(arg prefix)base_link"/>
-    <child link="$(arg prefix)imu_link"/>
+  <joint name="${prefix}imu_joint" type="fixed">
+    <parent link="${prefix}base_link"/>
+    <child link="${prefix}imu_link"/>
     <origin xyz="0 0 0.65" rpy="0 0 0"/>
   </joint>
 
-  <gazebo reference="$(arg prefix)imu_joint">
+  <gazebo reference="${prefix}imu_joint">
     <preserveFixedJoint>true</preserveFixedJoint>
   </gazebo>
 
-  <gazebo reference="$(arg prefix)imu_link">
-    <sensor name="$(arg prefix)imu_sensor" type="imu">
+  <gazebo reference="${prefix}imu_link">
+    <sensor name="${robot_namespace}_imu_sensor" type="imu">
       <always_on>true</always_on>
       <update_rate>100</update_rate>
-      <topic>/$(arg robot_namespace)/imu</topic>
+
+      <topic>/${robot_namespace}/imu/data</topic>
+      <gz_frame_id>${robot_namespace}/imu_link</gz_frame_id>
     </sensor>
   </gazebo>
 
-  <!-- Gazebo robot plugins -->
+
+  <!-- ================= GAZEBO DIFF DRIVE ================= -->
+
   <gazebo>
-    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
-      <left_joint>$(arg prefix)left_wheel_joint</left_joint>
-      <right_joint>$(arg prefix)right_wheel_joint</right_joint>
+    <plugin
+      filename="gz-sim-diff-drive-system"
+      name="gz::sim::systems::DiffDrive">
+
+      <left_joint>${prefix}left_wheel_joint</left_joint>
+      <right_joint>${prefix}right_wheel_joint</right_joint>
+
       <wheel_separation>1.4</wheel_separation>
       <wheel_radius>0.30</wheel_radius>
-      <topic>/$(arg robot_namespace)/cmd_vel</topic>
-      <odom_topic>/$(arg robot_namespace)/odom</odom_topic>
-      <frame_id>$(arg prefix)odom</frame_id>
-      <child_frame_id>$(arg prefix)base_link</child_frame_id>
+
+      <topic>/${robot_namespace}/cmd_vel</topic>
+
+      <odom_topic>/${robot_namespace}/odom</odom_topic>
+
+      <frame_id>${robot_namespace}/odom</frame_id>
+      <child_frame_id>${robot_namespace}/base_link</child_frame_id>
+
       <odom_publish_frequency>30</odom_publish_frequency>
-      <publish_odom_tf>true</publish_odom_tf>
+
+      <publish_odom_tf>false</publish_odom_tf>
     </plugin>
 
-    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
-      <joint_name>$(arg prefix)left_wheel_joint</joint_name>
-      <joint_name>$(arg prefix)right_wheel_joint</joint_name>
+
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+
+      <joint_name>${prefix}left_wheel_joint</joint_name>
+      <joint_name>${prefix}right_wheel_joint</joint_name>
+
     </plugin>
   </gazebo>
 

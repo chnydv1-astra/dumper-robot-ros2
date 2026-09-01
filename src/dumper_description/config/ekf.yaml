@@ -1,4 +1,4 @@
-ekf_filter_node:
+/dumper1/ekf_filter_node:
   ros__parameters:
     frequency: 30.0
     sensor_timeout: 0.2
@@ -6,11 +6,11 @@ ekf_filter_node:
     publish_tf: true
 
     map_frame: map
-    odom_frame: odom
-    base_link_frame: base_link
-    world_frame: odom
+    odom_frame: dumper1/odom
+    base_link_frame: dumper1/base_link
+    world_frame: dumper1/odom
 
-    odom0: /odom
+    odom0: /dumper1/odom
     odom0_config: [true, true, false,
                    false, false, true,
                    true, true, false,
@@ -20,7 +20,7 @@ ekf_filter_node:
     odom0_relative: false
     odom0_queue_size: 10
 
-    imu0: /imu/data
+    imu0: /dumper1/imu/data
     imu0_config: [false, false, false,
                   false, false, false,
                   false, false, false,
