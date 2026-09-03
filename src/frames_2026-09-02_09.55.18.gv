@@ -1,0 +1,18 @@
+digraph G {
+"dumper1/base_link" -> "dumper1/left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.494\nBuffer length: 1.903\nMost recent transform: 194.651\nOldest transform: 192.748\n"];
+"dumper1/odom" -> "dumper1/base_link"[label=" Broadcaster: default_authority\nAverage rate: 30.526\nBuffer length: 1.9\nMost recent transform: 194.66\nOldest transform: 192.76\n"];
+"dumper1/base_link" -> "dumper1/right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.494\nBuffer length: 1.903\nMost recent transform: 194.651\nOldest transform: 192.748\n"];
+"dumper2/base_link" -> "dumper2/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper2/base_link" -> "dumper2/left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.526\nBuffer length: 1.9\nMost recent transform: 194.653\nOldest transform: 192.753\n"];
+"dumper2/base_link" -> "dumper2/right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 20.526\nBuffer length: 1.9\nMost recent transform: 194.653\nOldest transform: 192.753\n"];
+"dumper1/base_link" -> "dumper1/caster"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dumper1/base_link" -> "dumper1/lidar_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"map" -> "dumper1/odom"[label=" Broadcaster: default_authority\nAverage rate: 10.526\nBuffer length: 1.9\nMost recent transform: 194.8\nOldest transform: 192.9\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1788323118.2426503"[ shape=plaintext ] ;
+}->"map";
+}

@@ -100,15 +100,16 @@ def generate_launch_description():
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=[
-            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+                "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
 
-            "/dumper1/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-            "/dumper1/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            "/dumper1/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
+                "/dumper1/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+                "/dumper1/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+                "/dumper1/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+                "/dumper1/imu/data@sensor_msgs/msg/Imu[gz.msgs.IMU",
 
-            "/dumper2/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            "/dumper2/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+                "/dumper2/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+                "/dumper2/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+                "/dumper2/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
 
             "/world/mine_world/model/dumper1/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model",
             "/world/mine_world/model/dumper2/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
@@ -116,7 +117,7 @@ def generate_launch_description():
             
         ],
         remappings=[
-            ("/odom", "/dumper1/odom"),
+            
 
             ("/world/mine_world/model/dumper1/joint_state",
              "/dumper1/joint_states"),

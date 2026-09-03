@@ -1,3 +1,4 @@
+import copy
 import math
 
 import rclpy
@@ -8,46 +9,46 @@ from nav_msgs.msg import Odometry
 class V2VNode(Node):
 
     def __init__(self):
-        super().__init__("v2v_node")
+        super().__init__('v2v_node')
 
-        self.declare_parameter("peer_topic", "/dumper2/v2v/state")
-        self.declare_parameter("world_offset_x", 0.0)
-        self.declare_parameter("world_offset_y", 0.0)
-        self.declare_parameter("warning_distance", 10.0)
+        self.declare_parameter('odom_topic', '/dumper1/odom')
+        self.declare_parameter('peer_topic', '/dumper2/v2v/state')
+        self.declare_parameter('world_offset_x', 0.0)
+        self.declare_parameter('world_offset_y', 0.0)
+        self.declare_parameter('yaw_offset', 0.0)
 
-        self.peer_topic = self.get_parameter("peer_topic").value
-        self.offset_x = self.get_parameter("world_offset_x").value
-        self.offset_y = self.get_parameter("world_offset_y").value
-        self.warning_distance = self.get_parameter("warning_distance").value
+        odom_topic = self.get_parameter('odom_topic').value
+        peer_topic = self.get_parameter('peer_topic').value
+
+        self.offset_x = float(
+            self.get_parameter('world_offset_x').value
+        )
+        self.offset_y = float(
+            self.get_parameter('world_offset_y').value
+        )
+        self.yaw_offset = float(
+            self.get_parameter('yaw_offset').value
+        )
 
         self.latest_state = None
         self.peer_state = None
 
         self.state_pub = self.create_publisher(
             Odometry,
-            "v2v/state",
+            'v2v/state',
             10
         )
 
-        # Use EKF filtered state for Dumper 1.
-        # If Dumper 2 does not have EKF, its normal odom will be used.
         self.state_sub = self.create_subscription(
             Odometry,
-            "odometry/filtered",
+            odom_topic,
             self.state_callback,
-            10
-        )
-
-        self.odom_sub = self.create_subscription(
-            Odometry,
-            "odom",
-            self.odom_callback,
             10
         )
 
         self.peer_sub = self.create_subscription(
             Odometry,
-            self.peer_topic,
+            peer_topic,
             self.peer_callback,
             10
         )
@@ -57,17 +58,8 @@ class V2VNode(Node):
             self.process_v2v
         )
 
-        self.get_logger().info(
-            f"V2V active. Receiving peer state from {self.peer_topic}"
-        )
-
     def state_callback(self, msg):
         self.latest_state = msg
-
-    def odom_callback(self, msg):
-        # Fallback for Dumper 2 or when EKF is unavailable.
-        if self.latest_state is None:
-            self.latest_state = msg
 
     def peer_callback(self, msg):
         self.peer_state = msg
@@ -77,46 +69,58 @@ class V2VNode(Node):
         if self.latest_state is None:
             return
 
-        x = (
-            self.latest_state.pose.pose.position.x
+        local_x = self.latest_state.pose.pose.position.x
+        local_y = self.latest_state.pose.pose.position.y
+
+        cos_yaw = math.cos(self.yaw_offset)
+        sin_yaw = math.sin(self.yaw_offset)
+
+        world_x = (
+            cos_yaw * local_x
+            - sin_yaw * local_y
             + self.offset_x
         )
 
-        y = (
-            self.latest_state.pose.pose.position.y
+        world_y = (
+            sin_yaw * local_x
+            + cos_yaw * local_y
             + self.offset_y
         )
 
         state = Odometry()
 
-        state.header = self.latest_state.header
-        state.header.frame_id = "mine_world"
-
+        state.header.stamp = self.get_clock().now().to_msg()
+        state.header.frame_id = 'mine_world'
         state.child_frame_id = self.latest_state.child_frame_id
 
-        state.pose.pose = self.latest_state.pose.pose
-        state.pose.pose.position.x = x
-        state.pose.pose.position.y = y
-
-        state.twist = self.latest_state.twist
-
-        self.state_pub.publish(state)
-
-        if self.peer_state is None:
-            return
-
-        peer_x = self.peer_state.pose.pose.position.x
-        peer_y = self.peer_state.pose.pose.position.y
-
-        distance = math.hypot(
-            peer_x - x,
-            peer_y - y
+        state.pose.pose = copy.deepcopy(
+            self.latest_state.pose.pose
         )
 
-        if distance < self.warning_distance:
-            self.get_logger().warn(
-                f"V2V WARNING: Dumper distance = {distance:.2f} m"
-            )
+        state.pose.pose.position.x = world_x
+        state.pose.pose.position.y = world_y
+
+        local_vx = self.latest_state.twist.twist.linear.x
+        local_vy = self.latest_state.twist.twist.linear.y
+
+        world_vx = (
+            cos_yaw * local_vx
+            - sin_yaw * local_vy
+        )
+
+        world_vy = (
+            sin_yaw * local_vx
+            + cos_yaw * local_vy
+        )
+
+        state.twist = copy.deepcopy(
+            self.latest_state.twist
+        )
+
+        state.twist.twist.linear.x = world_vx
+        state.twist.twist.linear.y = world_vy
+
+        self.state_pub.publish(state)
 
 
 def main(args=None):
@@ -125,12 +129,14 @@ def main(args=None):
 
     node = V2VNode()
 
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
 
     node.destroy_node()
-
     rclpy.shutdown()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
