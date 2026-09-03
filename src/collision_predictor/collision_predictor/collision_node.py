@@ -2,7 +2,9 @@ import math
 
 import rclpy
 from rclpy.node import Node
+
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Twist
 
 import tf2_ros
 
@@ -11,6 +13,10 @@ class CollisionPredictor(Node):
 
     def __init__(self):
         super().__init__("collision_predictor")
+
+        # -------------------------------------------------
+        # Parameters
+        # -------------------------------------------------
 
         self.declare_parameter(
             "peer_topic",
@@ -36,33 +42,75 @@ class CollisionPredictor(Node):
             "peer_topic"
         ).value
 
-        self.warning_distance = self.get_parameter(
-            "warning_distance"
-        ).value
+        self.warning_distance = float(
+            self.get_parameter("warning_distance").value
+        )
 
-        self.critical_distance = self.get_parameter(
-            "critical_distance"
-        ).value
+        self.critical_distance = float(
+            self.get_parameter("critical_distance").value
+        )
 
-        self.critical_ttc = self.get_parameter(
-            "critical_ttc"
-        ).value
+        self.critical_ttc = float(
+            self.get_parameter("critical_ttc").value
+        )
 
-        self.peer_state = None
+        # -------------------------------------------------
+        # V2V state
+        # -------------------------------------------------
 
-        # TF2 listener for SLAM pose
+        self.dumper1_state = None
+        self.dumper2_state = None
+
+        self.dumper1_sub = self.create_subscription(
+            Odometry,
+            "/dumper1/v2v/state",
+            self.dumper1_callback,
+            10
+        )
+
+        self.dumper2_sub = self.create_subscription(
+            Odometry,
+            peer_topic,
+            self.dumper2_callback,
+            10
+        )
+
+        # -------------------------------------------------
+        # TF2 / SLAM
+        # -------------------------------------------------
+
         self.tf_buffer = tf2_ros.Buffer()
+
         self.tf_listener = tf2_ros.TransformListener(
             self.tf_buffer,
             self
         )
 
-        self.peer_sub = self.create_subscription(
-            Odometry,
-            peer_topic,
-            self.peer_state_callback,
+        # -------------------------------------------------
+        # Emergency stop publishers
+        # -------------------------------------------------
+
+        self.dumper1_cmd_pub = self.create_publisher(
+            Twist,
+            "/dumper1/cmd_vel",
             10
         )
+
+        self.dumper2_cmd_pub = self.create_publisher(
+            Twist,
+            "/dumper2/cmd_vel",
+            10
+        )
+
+        # -------------------------------------------------
+        # Emergency-stop latch
+        # -------------------------------------------------
+
+        self.emergency_stop = False
+
+        # -------------------------------------------------
+        # Timer
+        # -------------------------------------------------
 
         self.timer = self.create_timer(
             0.1,
@@ -74,19 +122,35 @@ class CollisionPredictor(Node):
         )
 
         self.get_logger().info(
-            "Dumper1 position source: SLAM map frame"
+            "Collision frame: mine_world"
+        )
+
+        self.get_logger().info(
+            "SLAM TF: map -> dumper1/base_link"
         )
 
         self.get_logger().info(
             f"Monitoring peer: {peer_topic}"
         )
 
-    def peer_state_callback(self, msg):
-        self.peer_state = msg
+    # =====================================================
+    # Callbacks
+    # =====================================================
 
-    def get_dumper1_pose(self):
+    def dumper1_callback(self, msg):
+        self.dumper1_state = msg
+
+    def dumper2_callback(self, msg):
+        self.dumper2_state = msg
+
+    # =====================================================
+    # Get SLAM pose
+    # =====================================================
+
+    def get_slam_pose(self):
 
         try:
+
             transform = self.tf_buffer.lookup_transform(
                 "map",
                 "dumper1/base_link",
@@ -103,56 +167,94 @@ class CollisionPredictor(Node):
             tf2_ros.ConnectivityException,
             tf2_ros.ExtrapolationException
         ):
+
             return None
+
+    # =====================================================
+    # Emergency stop
+    # =====================================================
+
+    def stop_dumpers(self):
+
+        stop = Twist()
+
+        # Dumper 1
+        self.dumper1_cmd_pub.publish(stop)
+
+        # Dumper 2
+        self.dumper2_cmd_pub.publish(stop)
+
+    # =====================================================
+    # Collision calculation
+    # =====================================================
 
     def calculate_collision_risk(self):
 
-        if self.peer_state is None:
+        if self.dumper1_state is None:
+            return
+
+        if self.dumper2_state is None:
             return
 
         # -------------------------------------------------
-        # Dumper1 position from SLAM
+        # If emergency stop has already been triggered,
+        # continuously publish zero velocity.
         # -------------------------------------------------
 
-        dumper1_pose = self.get_dumper1_pose()
+        if self.emergency_stop:
 
-        if dumper1_pose is None:
-            self.get_logger().warn(
-                "Waiting for SLAM pose..."
+            self.stop_dumpers()
+
+            self.get_logger().error(
+                "EMERGENCY STOP LATCHED | "
+                "Both dumpers commanded to STOP"
             )
+
             return
 
-        map_x, map_y = dumper1_pose
-
         # -------------------------------------------------
-        # IMPORTANT:
-        # Current SLAM map and mine_world have the same
-        # orientation in our simulation.
+        # Get SLAM pose
         #
-        # We establish the mine_world origin from the
-        # initial SLAM pose.
+        # SLAM is monitored here, but collision coordinates
+        # remain in mine_world because both V2V states are
+        # already correctly aligned there.
         # -------------------------------------------------
 
-        if not hasattr(self, "slam_origin_x"):
+        slam_pose = self.get_slam_pose()
 
-            self.slam_origin_x = map_x
-            self.slam_origin_y = map_y
+        if slam_pose is None:
 
-            self.get_logger().info(
-                f"SLAM reference initialized: "
-                f"map=({map_x:.2f}, {map_y:.2f})"
+            self.get_logger().warn(
+                "SLAM TF unavailable"
             )
 
-        # Convert SLAM displacement into mine_world
-        my_x = map_x - self.slam_origin_x
-        my_y = map_y - self.slam_origin_y
-
         # -------------------------------------------------
-        # Dumper2 V2V position
+        # Dumper1 position
         # -------------------------------------------------
 
-        peer_x = self.peer_state.pose.pose.position.x
-        peer_y = self.peer_state.pose.pose.position.y
+        my_x = (
+            self.dumper1_state
+            .pose.pose.position.x
+        )
+
+        my_y = (
+            self.dumper1_state
+            .pose.pose.position.y
+        )
+
+        # -------------------------------------------------
+        # Dumper2 position
+        # -------------------------------------------------
+
+        peer_x = (
+            self.dumper2_state
+            .pose.pose.position.x
+        )
+
+        peer_y = (
+            self.dumper2_state
+            .pose.pose.position.y
+        )
 
         # -------------------------------------------------
         # Relative position
@@ -161,53 +263,37 @@ class CollisionPredictor(Node):
         dx = peer_x - my_x
         dy = peer_y - my_y
 
-        distance = math.hypot(dx, dy)
+        distance = math.hypot(
+            dx,
+            dy
+        )
 
         if distance < 0.001:
             return
 
         # -------------------------------------------------
-        # Relative velocity
+        # Velocities
         # -------------------------------------------------
 
-        peer_vx = self.peer_state.twist.twist.linear.x
-        peer_vy = self.peer_state.twist.twist.linear.y
+        my_vx = (
+            self.dumper1_state
+            .twist.twist.linear.x
+        )
 
-        # SLAM position is used for position.
-        # Dumper1 velocity comes from the V2V state.
-        #
-        # The V2V velocity is already in mine_world.
-        #
-        # This keeps the existing velocity/TTC system.
-        # -------------------------------------------------
+        my_vy = (
+            self.dumper1_state
+            .twist.twist.linear.y
+        )
 
-        # Estimate Dumper1 velocity from SLAM position
-        current_time = self.get_clock().now()
+        peer_vx = (
+            self.dumper2_state
+            .twist.twist.linear.x
+        )
 
-        if not hasattr(self, "previous_x"):
-
-            self.previous_x = my_x
-            self.previous_y = my_y
-            self.previous_time = current_time
-
-            return
-
-        dt = (
-            current_time - self.previous_time
-        ).nanoseconds / 1e9
-
-        if dt <= 0.0 or dt > 1.0:
-            self.previous_x = my_x
-            self.previous_y = my_y
-            self.previous_time = current_time
-            return
-
-        my_vx = (my_x - self.previous_x) / dt
-        my_vy = (my_y - self.previous_y) / dt
-
-        self.previous_x = my_x
-        self.previous_y = my_y
-        self.previous_time = current_time
+        peer_vy = (
+            self.dumper2_state
+            .twist.twist.linear.y
+        )
 
         # -------------------------------------------------
         # Relative velocity
@@ -216,20 +302,31 @@ class CollisionPredictor(Node):
         relative_vx = peer_vx - my_vx
         relative_vy = peer_vy - my_vy
 
-        # Unit vector Dumper1 -> Dumper2
+        # -------------------------------------------------
+        # Closing speed
+        # -------------------------------------------------
+
         ux = dx / distance
         uy = dy / distance
 
-        # Closing speed
         closing_speed = -(
             relative_vx * ux +
             relative_vy * uy
         )
 
-        # TTC
+        # -------------------------------------------------
+        # Time To Collision
+        # -------------------------------------------------
+
         if closing_speed > 0.01:
-            ttc = distance / closing_speed
+
+            ttc = (
+                distance /
+                closing_speed
+            )
+
         else:
+
             ttc = float("inf")
 
         # -------------------------------------------------
@@ -240,43 +337,57 @@ class CollisionPredictor(Node):
             distance <= self.critical_distance
             or ttc <= self.critical_ttc
         ):
+
             risk = "CRITICAL"
 
         elif distance <= self.warning_distance:
+
             risk = "WARNING"
 
         else:
+
             risk = "SAFE"
 
         # -------------------------------------------------
-        # Output
+        # Emergency stop
         # -------------------------------------------------
 
         if risk == "CRITICAL":
 
+            self.emergency_stop = True
+
+            self.stop_dumpers()
+
+            slam_text = "N/A"
+
+            if slam_pose is not None:
+
+                slam_text = (
+                    f"({slam_pose[0]:.2f}, "
+                    f"{slam_pose[1]:.2f})"
+                )
+
             self.get_logger().error(
-                f"COLLISION RISK: {risk} | "
+                f"🚨 EMERGENCY STOP | "
                 f"Distance={distance:.2f} m | "
                 f"Closing Speed={closing_speed:.2f} m/s | "
                 f"TTC={ttc:.2f} s | "
-                f"SLAM=({my_x:.2f}, {my_y:.2f})"
+                f"SLAM={slam_text}"
             )
 
         elif risk == "WARNING":
 
             self.get_logger().warn(
-                f"COLLISION RISK: {risk} | "
+                f"COLLISION RISK: WARNING | "
                 f"Distance={distance:.2f} m | "
-                f"TTC={ttc:.2f} s | "
-                f"SLAM=({my_x:.2f}, {my_y:.2f})"
+                f"TTC={ttc:.2f} s"
             )
 
         else:
 
             self.get_logger().info(
                 f"Collision status: SAFE | "
-                f"Distance={distance:.2f} m | "
-                f"SLAM=({my_x:.2f}, {my_y:.2f})"
+                f"Distance={distance:.2f} m"
             )
 
 
@@ -287,12 +398,15 @@ def main(args=None):
     node = CollisionPredictor()
 
     try:
+
         rclpy.spin(node)
 
     except KeyboardInterrupt:
+
         pass
 
     node.destroy_node()
+
     rclpy.shutdown()
 
 
