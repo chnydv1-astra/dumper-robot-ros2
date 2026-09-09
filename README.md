@@ -22,3 +22,28 @@ Autonomous dumper robot simulation in Gazebo Fortress with LiDAR SLAM mapping us
   -p odom_frame:=odom
 
   ros2 run teleop_twist_keyboard teleop_twist_keyboard# dumper-robot-ros2
+
+  Terminal 1 — Start the complete simulation
+  cd ~/dev_dumper_ws
+  source install/setup.bash
+  ros2 launch dumper_gazebo full_system.launch.py
+
+Terminal 2 — Start the collision predictor / LiDAR safety system
+cd ~/dev_dumper_ws
+source install/setup.bash
+ros2 run collision_predictor collision_node
+
+Terminal 3 — Drive Dumper1
+cd ~/dev_dumper_ws
+source install/setup.bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/dumper1/teleop_cmd_vel
+
+Terminal 4 — Drive Dumper2
+cd ~/dev_dumper_ws
+source install/setup.bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/dumper2/teleop_cmd_vel
+
+
+
+
+  
